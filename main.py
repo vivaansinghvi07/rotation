@@ -1,9 +1,11 @@
 from __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
-from math import sin, cos
+from math import sin, cos, radians as rad
 import imageio.v2 as imageio
 import os
+import pynterface
+from pynterface import Color
 
 class Point:
     def __init__(self, x, y, z):
@@ -27,7 +29,7 @@ class Point:
         newz = (x*-sb   + y*cb*sc            + z*cb*cc) 
         return Point(newx, newy, newz)
     
-def make_gif():
+def make_gif(fps):
 
     # creates images array and depth counter
     images, i = [], 1
@@ -41,28 +43,60 @@ def make_gif():
             break
 
     # saves the gif
-    imageio.mimsave("plot.gif", images, duration=0.05, loop=0)
+    imageio.mimsave("plot.gif", images, fps=fps, loop=0)
 
     # deletes all the images
     for i in range(1, len(images)+1):
         os.remove(f"imgs/{i}.png")
 
-ax = plt.axes(projection="3d")
-points = [Point(x, y, z) for x in range(-5, 6) for y in range(-5, 6) for z in range(0, 10)]
+def rotating_gif(frames, fps, pitch, roll, yaw):
 
-for i, pitch in enumerate(np.linspace(0, np.pi, 40), start=1):
+    ax = plt.axes(projection="3d")
+    points = [Point(x, y, z) for x in range(-5, 6) for y in range(-5, 6) for z in range(-5, 6)]
 
-    rotated = [p.rotated(pitch, 0, 0) for p in points]    
+    i = 1
 
-    x_vals = [p.x for p in rotated]
-    y_vals = [p.y for p in rotated]
-    z_vals = [p.z for p in rotated]
+    for p, r, y in zip(np.linspace(0, pitch, frames), 
+                       np.linspace(0, roll, frames), 
+                       np.linspace(0, yaw, frames)):
 
-    ax.scatter3D(x_vals, y_vals, z_vals)
-    ax.set_xlim(-7, 7)
-    ax.set_ylim(-7, 7)
-    ax.set_zlim(0, 10)
-    plt.savefig(f"imgs/{i}.png")
-    plt.cla()
+        rotated = [point.rotated(p, r, y) for point in points]    
 
-make_gif()
+        x_vals = [point.x for point in rotated]
+        y_vals = [point.y for point in rotated]
+        z_vals = [point.z for point in rotated]
+
+        ax.scatter3D(x_vals, y_vals, z_vals)
+        ax.set_xlim(-7, 7)
+        ax.set_ylim(-7, 7)
+        ax.set_zlim(-7, 7)
+        plt.grid(False)
+        plt.axis('off')
+        plt.savefig(f"imgs/{i}.png")
+        plt.cla()
+
+        i += 1
+
+    make_gif(fps)
+
+def main():
+
+    # get the input
+    frames = int(input("Enter the number of frames (-1 for auto): " + Color.BLUE))
+    fps = int(input(Color.RESET_COLOR + "Enter the frames per second: " + Color.BLUE))
+    pitch, roll, yaw = [float(input(Color.RESET_COLOR + f"Enter the target {var} in degrees: " + Color.BLUE))
+                        for var in ["pitch", "roll", "yaw"]]
+    
+    # automatically determine number of frames (currently 60 per full rotation)
+    if frames == -1:
+        frames = max([pitch, roll, yaw]) // 6 
+
+    print(end=Color.RESET_COLOR)
+    method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type fo output:")
+    if method == "gif":
+        rotating_gif(frames, fps, *map(rad, [pitch, roll, yaw]))
+
+
+if __name__ == "__main__":
+
+    main()
