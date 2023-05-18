@@ -2,7 +2,7 @@ from __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
 from math import sin, cos, radians as rad
-import imageio.v2 as imageio
+import imageio
 import os
 import pynterface
 from pynterface import Color
@@ -43,7 +43,7 @@ def make_gif(fps):
             break
 
     # saves the gif
-    imageio.mimsave("plot.gif", images, fps=fps, loop=0)
+    imageio.mimsave("plot.gif", images, fps=fps)
 
     # deletes all the images
     for i in range(1, len(images)+1):
@@ -89,7 +89,7 @@ def main():
     
     # automatically determine number of frames (currently 60 per full rotation)
     if frames == -1:
-        frames = max([pitch, roll, yaw]) // 6 
+        frames = int(max([pitch, roll, yaw]) // 6)
 
     print(end=Color.RESET_COLOR)
     method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type fo output:")
