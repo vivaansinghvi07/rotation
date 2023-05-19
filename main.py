@@ -84,6 +84,7 @@ def main():
     # get the input
     frames = int(input("Enter the number of frames (-1 for auto): " + Color.BLUE))
     fps = int(input(Color.RESET_COLOR + "Enter the frames per second: " + Color.BLUE))
+    assert 0 < fps <= 60, "FPS must be at least 1 or at most 60."
     pitch, roll, yaw = [float(input(Color.RESET_COLOR + f"Enter the target {var} in degrees: " + Color.BLUE))
                         for var in ["pitch", "roll", "yaw"]]
     
