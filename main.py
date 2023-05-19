@@ -92,7 +92,7 @@ def main():
         frames = int(max([pitch, roll, yaw]) // 6)
 
     print(end=Color.RESET_COLOR)
-    method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type fo output:")
+    method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type of output:")
     if method == "gif":
         rotating_gif(frames, fps, *map(rad, [pitch, roll, yaw]))
 
