@@ -29,6 +29,10 @@ class Point:
         newz = (x*-sb   + y*cb*sc            + z*cb*cc) 
         return Point(newx, newy, newz)
     
+def blue_after(prompt):
+    """ Makes the string end in a blue colored prompt, and begin with a color reset. """
+    return Color.RESET_COLOR + prompt + Color.BLUE
+    
 def make_gif(fps):
 
     # creates images array and depth counter
@@ -49,10 +53,27 @@ def make_gif(fps):
     for i in range(1, len(images)+1):
         os.remove(f"imgs/{i}.png")
 
-def rotating_gif(frames, fps, pitch, roll, yaw):
+def gen_shape():
+    
+    rect = "Rectangular Prism"
+    sphere = "Sphere"
+
+    shape = pynterface.numbered_menu([rect, sphere], beginning_prompt=Color.RESET_COLOR + "Select the type of shape to be modeled: ")
+
+    if shape == rect:
+        l, w, h = map(float, input(blue_after("Enter the dimensions seperated by commas in the form [l, w, h]: ")).split(','))   
+        n = int(input(blue_after("Enter an approximate number of points: ")))
+
+        points_per_unit = n // (l*w*h)
+
+        points = [Point(x, y, z) for x in np.linspace(0, l, round(l*points_per_unit))
+                                 for y in np.linspace(0, w, round(w*points_per_unit))
+                                 for z in np.linspace(0, h, round(h*points_per_unit))]
+        return points
+
+def rotating_gif(frames, fps, points, pitch, roll, yaw):
 
     ax = plt.axes(projection="3d")
-    points = [Point(x, y, z) for x in range(-5, 6) for y in range(-5, 6) for z in range(-5, 6)]
 
     i = 1
 
@@ -82,11 +103,14 @@ def rotating_gif(frames, fps, pitch, roll, yaw):
 def main():
 
     # get the input
-    frames = int(input("Enter the number of frames (-1 for auto): " + Color.BLUE))
-    fps = int(input(Color.RESET_COLOR + "Enter the frames per second: " + Color.BLUE))
-    assert 0 < fps <= 60, "FPS must be at least 1 or at most 60."
-    pitch, roll, yaw = [float(input(Color.RESET_COLOR + f"Enter the target {var} in degrees: " + Color.BLUE))
+    frames = int(input(blue_after("Enter the number of frames (-1 for auto): ")))
+    fps = int(input(blue_after("Enter the frames per second: ")))
+    assert 0 < fps <= 60, Color.RESET_COLOR + "FPS must be at least 1 or at most 60."
+    pitch, roll, yaw = [float(input(blue_after(f"Enter the target {var} in degrees: ")))
                         for var in ["pitch", "roll", "yaw"]]
+    
+    # get the points
+    points = gen_shape()
     
     # automatically determine number of frames (currently 60 per full rotation)
     if frames == -1:
@@ -95,8 +119,7 @@ def main():
     print(end=Color.RESET_COLOR)
     method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type of output:")
     if method == "gif":
-        rotating_gif(frames, fps, *map(rad, [pitch, roll, yaw]))
-
+        rotating_gif(frames, fps, points, *map(rad, [pitch, roll, yaw]))
 
 if __name__ == "__main__":
 
