@@ -69,7 +69,7 @@ def gen_shape():
         if point == "-1":
             x0, y0, z0 = -l/2, -w/2, -h/2
         else:
-            x0, y0, z0 = map(lambda x: -x, map(float, point.split()))
+            x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
 
         points_per_unit = (n // (l*w*h)) ** (1/3)
 
