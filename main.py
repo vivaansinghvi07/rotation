@@ -77,35 +77,51 @@ def gen_shape():
                                  for y in np.linspace(y0, y0+w, round(w*points_per_unit))
                                  for z in np.linspace(z0, z0+h, round(h*points_per_unit))]
         
-        return points
+        dims = {
+            'x': x0, 'y': y0, 'z': z0,
+            'l': l, 'w': w, 'h': h
+        }
+        
+        return points, dims
 
-def rotating_gif(frames, fps, points, pitch, roll, yaw):
+def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
 
     ax = plt.axes(projection="3d")
-
     i = 1
+
+    l, w, h = map(abs, [dims['l'], dims['w'], dims['h']])
+    x0, y0, z0 = map(abs, [dims['x'], dims['y'], dims['z']])
+
+    lim = max(l+x0, w+y0, h+z0) / 1.25
 
     for p, r, y in zip(np.linspace(0, pitch, frames), 
                        np.linspace(0, roll, frames), 
                        np.linspace(0, yaw, frames)):
 
+        # rotate points
         rotated = [point.rotated(p, r, y) for point in points]    
 
+        # fetch values
         x_vals = [point.x for point in rotated]
         y_vals = [point.y for point in rotated]
         z_vals = [point.z for point in rotated]
 
+        ax.set_aspect('auto')
+
+        # plot settings
         ax.scatter3D(x_vals, y_vals, z_vals)
-        ax.set_xlim(-7, 7)
-        ax.set_ylim(-7, 7)
-        ax.set_zlim(-7, 7)
+        ax.set_xlim(-lim, lim)
+        ax.set_ylim(-lim, lim)
+        ax.set_zlim(-lim, lim)
         plt.grid(False)
         plt.axis('off')
-        plt.savefig(f"imgs/{i}.png")
+        plt.savefig(f"imgs/{i}.png", bbox_inches='tight')
         plt.cla()
 
+        # increment plot name counter
         i += 1
 
+    # turn into gif
     make_gif(fps)
 
 def main():
@@ -118,7 +134,7 @@ def main():
                         for var in ["pitch", "roll", "yaw"]]
     
     # get the points
-    points = gen_shape()
+    points, dims = gen_shape()
     
     # automatically determine number of frames (currently 60 per full rotation)
     if frames == -1:
@@ -127,7 +143,7 @@ def main():
     print(end=Color.RESET_COLOR)
     method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type of output:")
     if method == "gif":
-        rotating_gif(frames, fps, points, *map(rad, [pitch, roll, yaw]))
+        rotating_gif(frames, fps, points, dims, *map(rad, [pitch, roll, yaw]))
 
 if __name__ == "__main__":
 
