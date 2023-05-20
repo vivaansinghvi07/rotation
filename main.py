@@ -71,7 +71,7 @@ def gen_shape():
         else:
             x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
 
-        points_per_unit = (n // (l*w*h)) ** (1/3)
+        points_per_unit = (n / (l*w*h)) ** (1/3)
 
         points = [Point(x, y, z) for x in np.linspace(x0, x0+l, round(l*points_per_unit))
                                  for y in np.linspace(y0, y0+w, round(w*points_per_unit))
@@ -92,7 +92,7 @@ def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
     l, w, h = map(abs, [dims['l'], dims['w'], dims['h']])
     x0, y0, z0 = map(abs, [dims['x'], dims['y'], dims['z']])
 
-    lim = max(l+x0, w+y0, h+z0) / 1.25
+    lim = max(l/2+x0, w/2+y0, h/2+z0) * 1.25
 
     for p, r, y in zip(np.linspace(0, pitch, frames), 
                        np.linspace(0, roll, frames), 
