@@ -71,7 +71,7 @@ def gen_shape():
         else:
             x0, y0, z0 = map(lambda x: -x, map(float, point.split()))
 
-        points_per_unit = n // (l*w*h)
+        points_per_unit = (n // (l*w*h)) ** (1/3)
 
         points = [Point(x, y, z) for x in np.linspace(x0, x0+l, round(l*points_per_unit))
                                  for y in np.linspace(y0, y0+w, round(w*points_per_unit))
