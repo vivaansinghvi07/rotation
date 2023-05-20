@@ -61,14 +61,22 @@ def gen_shape():
     shape = pynterface.numbered_menu([rect, sphere], beginning_prompt=Color.RESET_COLOR + "Select the type of shape to be modeled: ")
 
     if shape == rect:
-        l, w, h = map(float, input(blue_after("Enter the dimensions seperated by commas in the form [l, w, h]: ")).split(','))   
+        l, w, h = map(float, input(blue_after("Enter the dimensions seperated by commas in the form \"l, w, h\": ")).split(','))   
         n = int(input(blue_after("Enter an approximate number of points: ")))
+        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
+
+        # determine if needs to automatically calc center
+        if point == "-1":
+            x0, y0, z0 = -l/2, -w/2, -h/2
+        else:
+            x0, y0, z0 = map(lambda x: -x, map(float, point.split()))
 
         points_per_unit = n // (l*w*h)
 
-        points = [Point(x, y, z) for x in np.linspace(0, l, round(l*points_per_unit))
-                                 for y in np.linspace(0, w, round(w*points_per_unit))
-                                 for z in np.linspace(0, h, round(h*points_per_unit))]
+        points = [Point(x, y, z) for x in np.linspace(x0, x0+l, round(l*points_per_unit))
+                                 for y in np.linspace(y0, y0+w, round(w*points_per_unit))
+                                 for z in np.linspace(z0, z0+h, round(h*points_per_unit))]
+        
         return points
 
 def rotating_gif(frames, fps, points, pitch, roll, yaw):
