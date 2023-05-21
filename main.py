@@ -42,8 +42,9 @@ def gen_shape():
     
     rect = "Rectangular Prism"
     sphere = "Sphere"
+    tetra = "Tetrahedron"
 
-    shape = pynterface.numbered_menu([rect, sphere], beginning_prompt=Color.RESET_COLOR + "Select the type of shape to be modeled: ")
+    shape = pynterface.numbered_menu([rect, sphere, tetra], beginning_prompt=Color.RESET_COLOR + "Select the type of shape to be modeled: ")
 
     if shape == rect:
         l, w, h = map(float, input(blue_after("Enter the dimensions seperated by commas in the form \"l, w, h\": ")).split(','))   
@@ -70,7 +71,7 @@ def gen_shape():
     elif shape == sphere:
 
         r = float(input(blue_after("Enter the radius of the sphere: ")))
-        n = int(input(blue_after("Enter an approximate number of points: ")))
+        n = int(input(blue_after("Enter an approximate number of points: ")))  
         point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
 
         # determine if needs to automatically calc center
@@ -79,14 +80,13 @@ def gen_shape():
         else:
             x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
 
-        points_per_unit = (n * (4/3 * np.pi / 8) / (2*r)**3 ) ** (1/3) * 2
+        points_per_unit = (n/(4/3*np.pi*r**3))**(1/3)*2 # fit to cube
         
         points = [point for x in np.linspace(x0-r, x0+r, round(r*points_per_unit))
                         for y in np.linspace(y0-r, y0+r, round(r*points_per_unit))
                         for z in np.linspace(z0-r, z0+r, round(r*points_per_unit))
                         if (point:=Point(x, y, z)).dist(x0, y0, z0) <= r]
         
-        print(len(points))
         dims = {
             'x': x0, 'y': y0, 'z': z0,
             'l': 2*r, 'w': 2*r, 'h': 2*r
