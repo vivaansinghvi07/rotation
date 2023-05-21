@@ -200,6 +200,8 @@ def main():
     method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type of output:")
     if method == "gif":
         rotating_gif(frames, fps, points, lim, *map(rad, [pitch, roll, yaw]))
+    elif method == "other":
+        print("Other methods not supported yet!")
 
 if __name__ == "__main__":
 
