@@ -29,8 +29,10 @@ class Point:
         newz = (x*-sb   + y*cb*sc            + z*cb*cc) 
         return Point(newx, newy, newz)
     
-    def dist(self):
-        return np.sqrt(self.x**2 + self.y**2 + self.z**2)
+    def dist(self, x, y, z):
+        return np.sqrt((x-self.x)**2 
+                     + (y-self.y)**2 
+                     + (z-self.z)**2)
     
 def blue_after(prompt):
     """ Makes the string end in a blue colored prompt, and begin with a color reset. """
@@ -65,10 +67,32 @@ def gen_shape():
             'l': l, 'w': w, 'h': h
         }
     
-    
+    elif shape == sphere:
+
+        r = float(input(blue_after("Enter the radius of the sphere: ")))
+        n = int(input(blue_after("Enter an approximate number of points: ")))
+        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
+
+        # determine if needs to automatically calc center
+        if point == "-1":
+            x0, y0, z0 = 0, 0, 0
+        else:
+            x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
+
+        points_per_unit = (n * (4/3 * np.pi / 8) / (2*r)**3 ) ** (1/3) * 2
+        
+        points = [point for x in np.linspace(x0-r, x0+r, round(r*points_per_unit))
+                        for y in np.linspace(y0-r, y0+r, round(r*points_per_unit))
+                        for z in np.linspace(z0-r, z0+r, round(r*points_per_unit))
+                        if (point:=Point(x, y, z)).dist(x0, y0, z0) <= r]
+        
+        print(len(points))
+        dims = {
+            'x': x0, 'y': y0, 'z': z0,
+            'l': 2*r, 'w': 2*r, 'h': 2*r
+        }
 
     return points, dims
-        
 
 def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
 
