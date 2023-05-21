@@ -29,6 +29,9 @@ class Point:
         newz = (x*-sb   + y*cb*sc            + z*cb*cc) 
         return Point(newx, newy, newz)
     
+    def dist(self):
+        return np.sqrt(self.x**2 + self.y**2 + self.z**2)
+    
 def blue_after(prompt):
     """ Makes the string end in a blue colored prompt, and begin with a color reset. """
     return Color.RESET_COLOR + prompt + Color.BLUE
@@ -61,8 +64,11 @@ def gen_shape():
             'x': x0, 'y': y0, 'z': z0,
             'l': l, 'w': w, 'h': h
         }
+    
+    
+
+    return points, dims
         
-        return points, dims
 
 def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
 
