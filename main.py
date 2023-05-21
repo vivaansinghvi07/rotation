@@ -32,26 +32,6 @@ class Point:
 def blue_after(prompt):
     """ Makes the string end in a blue colored prompt, and begin with a color reset. """
     return Color.RESET_COLOR + prompt + Color.BLUE
-    
-def make_gif(fps):
-
-    # creates images array and depth counter
-    images, i = [], 1
-
-    # adds images to the images array
-    while True:
-        try:
-            images.append(imageio.imread(f"imgs/{i}.png"))
-            i += 1
-        except:
-            break
-
-    # saves the gif
-    imageio.mimsave("plot.gif", images, fps=fps)
-
-    # deletes all the images
-    for i in range(1, len(images)+1):
-        os.remove(f"imgs/{i}.png")
 
 def gen_shape():
     
@@ -121,8 +101,23 @@ def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
         # increment plot name counter
         i += 1
 
-    # turn into gif
-    make_gif(fps)
+    # creates images array and depth counter
+    images, i = [], 1
+
+    # adds images to the images array
+    while True:
+        try:
+            images.append(imageio.imread(f"imgs/{i}.png"))
+            i += 1
+        except:
+            break
+
+    # saves the gif
+    imageio.mimsave("plot.gif", images, fps=fps)
+
+    # deletes all the images
+    for i in range(1, len(images)+1):
+        os.remove(f"imgs/{i}.png")
 
 def main():
 
