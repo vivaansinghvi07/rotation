@@ -5,6 +5,7 @@ from math import sin, cos, radians as rad
 import imageio
 import os
 import pynterface
+import math
 from pynterface import Color
 
 class Point:
@@ -30,7 +31,7 @@ class Point:
         return Point(newx, newy, newz)
     
     def dist(self, x, y, z):
-        return np.sqrt((x-self.x)**2 
+        return math.sqrt((x-self.x)**2 
                      + (y-self.y)**2 
                      + (z-self.z)**2)
     
@@ -91,7 +92,50 @@ def gen_shape():
             'x': x0, 'y': y0, 'z': z0,
             'l': 2*r, 'w': 2*r, 'h': 2*r
         }
+    
+    elif shape == tetra:
 
+        s = float(input(blue_after("Enter a side length: ")))
+        n = int(input(blue_after("Enter an approximate number of points: ")))
+
+        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
+
+        # determine if needs to automatically calc center
+        if point == "-1":
+            x0, y0, z0 = 0, 0, (s*math.sqrt(3)/3)
+        else:
+            x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
+
+        points_per_side = round((n*(math.sqrt(72)))**(1/3))
+
+        def gen_triangle(x0, y0, z0, it, pps, slen):
+            # determine y of the points - py == 0 when it == 0 - py == height when it == pps
+            prog = it / pps
+            h = math.sqrt(3)/2    # ratio for calculating height
+            pz = z0 - prog * slen * h   # height level
+
+            # determine the coordinates of the other points
+            points = []
+            for i in range(it): # "it" determines how many levels there are in the triangle
+                dist = -(i - ((it-1) * 2/3))    # distance of the row from the center
+                py = y0 + dist * slen / pps * h # for each row
+                for j in range(i+1):
+                    px = x0 + (j - i / 2) * (slen / pps)
+                    points.append(Point(px, py, pz))
+            
+            return points
+        
+        points = []
+        for i in range(points_per_side):
+            # generate a base traingle centered around x0, y0, z0
+            temp_points = gen_triangle(x0, y0, z0, i, points_per_side, s)   
+            points.extend(temp_points)      # extend the temp points array
+
+        dims = {
+            'x': x0, 'y': y0, 'z': z0,
+            'l': s, 'w': s, 'h': s*math.sqrt(3)/2
+        }
+        
     return points, dims
 
 def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
