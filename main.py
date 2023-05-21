@@ -64,10 +64,7 @@ def gen_shape():
                                  for y in np.linspace(y0, y0+w, round(w*points_per_unit))
                                  for z in np.linspace(z0, z0+h, round(h*points_per_unit))]
         
-        dims = {
-            'x': x0, 'y': y0, 'z': z0,
-            'l': l, 'w': w, 'h': h
-        }
+        lim = max(map(lambda i: abs(i)/2, [l, w, h])) + max(map(abs, [x0, y0, z0]))
     
     elif shape == sphere:
 
@@ -87,11 +84,8 @@ def gen_shape():
                         for y in np.linspace(y0-r, y0+r, round(r*points_per_unit))
                         for z in np.linspace(z0-r, z0+r, round(r*points_per_unit))
                         if (point:=Point(x, y, z)).dist(x0, y0, z0) <= r]
-        
-        dims = {
-            'x': x0, 'y': y0, 'z': z0,
-            'l': 2*r, 'w': 2*r, 'h': 2*r
-        }
+
+        lim = max(map(abs, [x0, y0, z0])) * 2 * r
     
     elif shape == tetra:
 
@@ -100,25 +94,24 @@ def gen_shape():
 
         point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
 
+        # ratio for calculating height
+        h = math.sqrt(3)/2
+
         # determine if needs to automatically calc center
         if point == "-1":
-            x0, y0, z0 = 0, 0, (s*math.sqrt(3)/3)
+            x0, y0, z0 = 0, 0, (s*h*2/3)
         else:
             x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
 
         points_per_side = round((n*(math.sqrt(72)))**(1/3))
 
         def gen_triangle(x0, y0, z0, it, pps, slen):
-            # determine y of the points - py == 0 when it == 0 - py == height when it == pps
-            prog = it / pps
-            h = math.sqrt(3)/2    # ratio for calculating height
-            pz = z0 - prog * slen * h   # height level
 
             # determine the coordinates of the other points
             points = []
+            pz = z0 - it / pps * slen * h   # height level
             for i in range(it): # "it" determines how many levels there are in the triangle
-                dist = -(i - ((it-1) * 2/3))    # distance of the row from the center
-                py = y0 + dist * slen / pps * h # for each row
+                py = y0 + - (i - ((it-1) * 2/3)) * slen / pps * h # for each row
                 for j in range(i+1):
                     px = x0 + (j - i / 2) * (slen / pps)
                     points.append(Point(px, py, pz))
@@ -131,24 +124,16 @@ def gen_shape():
             temp_points = gen_triangle(x0, y0, z0, i, points_per_side, s)   
             points.extend(temp_points)      # extend the temp points array
 
-        dims = {
-            'x': x0, 'y': y0, 'z': z0,
-            'l': s, 'w': s, 'h': s*math.sqrt(3)/2
-        }
+        lim = max(map(abs, [x0, y0, z0-(s*h*2/3)])) + s * 0.5
         
-    return points, dims
+    return points, lim
 
-def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
+def rotating_gif(frames, fps, points, lim, pitch, roll, yaw):
 
     ax = plt.axes(projection="3d")
     os.mkdir("imgs")
     i = 1
-
-    l, w, h = map(abs, [dims['l'], dims['w'], dims['h']])
-    x0, y0, z0 = map(abs, [dims['x'], dims['y'], dims['z']])
-
-    lim = max(l/2+x0, w/2+y0, h/2+z0) * 1.1
-
+    
     for p, r, y in zip(np.linspace(0, pitch, frames), 
                        np.linspace(0, roll, frames), 
                        np.linspace(0, yaw, frames)):
@@ -205,7 +190,7 @@ def main():
                         for var in ["pitch", "roll", "yaw"]]
     
     # get the points
-    points, dims = gen_shape()
+    points, lim = gen_shape()
     
     # automatically determine number of frames (currently 60 per full rotation)
     if frames == -1:
@@ -214,7 +199,7 @@ def main():
     print(end=Color.RESET_COLOR)
     method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type of output:")
     if method == "gif":
-        rotating_gif(frames, fps, points, dims, *map(rad, [pitch, roll, yaw]))
+        rotating_gif(frames, fps, points, lim, *map(rad, [pitch, roll, yaw]))
 
 if __name__ == "__main__":
 
