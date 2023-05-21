@@ -4,6 +4,7 @@ import numpy as np
 from math import sin, cos, radians as rad
 import imageio
 import os
+import sys
 import pynterface
 import math
 from pynterface import Color
@@ -172,8 +173,11 @@ def rotating_gif(frames, fps, points, lim, pitch, roll, yaw):
         except:
             break
 
+    try: name = sys.argv[1]
+    except: name = "plot.gif"
+
     # saves the gif
-    imageio.mimsave("plot.gif", images, fps=fps)
+    imageio.mimsave(name, images, fps=fps)
 
     # deletes all the images
     for i in range(1, len(images)+1):
