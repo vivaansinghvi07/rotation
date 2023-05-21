@@ -67,6 +67,7 @@ def gen_shape():
 def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
 
     ax = plt.axes(projection="3d")
+    os.mkdir("imgs")
     i = 1
 
     l, w, h = map(abs, [dims['l'], dims['w'], dims['h']])
@@ -118,6 +119,7 @@ def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
     # deletes all the images
     for i in range(1, len(images)+1):
         os.remove(f"imgs/{i}.png")
+    os.rmdir("imgs")
 
 def main():
 
