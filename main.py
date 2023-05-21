@@ -92,7 +92,7 @@ def rotating_gif(frames, fps, points, dims, pitch, roll, yaw):
     l, w, h = map(abs, [dims['l'], dims['w'], dims['h']])
     x0, y0, z0 = map(abs, [dims['x'], dims['y'], dims['z']])
 
-    lim = max(l/2+x0, w/2+y0, h/2+z0) * 1.25
+    lim = max(l/2+x0, w/2+y0, h/2+z0) * 1.1
 
     for p, r, y in zip(np.linspace(0, pitch, frames), 
                        np.linspace(0, roll, frames), 
