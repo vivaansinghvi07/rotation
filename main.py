@@ -214,7 +214,15 @@ def main():
     print(end=Color.RESET_COLOR)
     method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type of output:")
     if method == "gif":
-        rotating_gif(int(frames), fps, points, name, pitch, roll, yaw)
+        rotating_gif(
+            frames=int(frames),
+            fps=fps,
+            points=points,
+            name=name,
+            pitch=pitch,
+            roll=roll,
+            yaw=yaw
+        )
     elif method == "other":
         print("Other methods not supported yet!")
 
