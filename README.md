@@ -87,11 +87,29 @@ Alernatively, if you edit the main function, you can directly call the `rotating
 ```python3
 rotating_gif(frames: int, 
              fps: int, 
-             shape: list[Point], 
+             shape: tuple[list[Point], float], 
              name: str, 
              pitch: float | int, 
              roll: float | int, 
-             yaw: float | int)
+             yaw: float | int) -> None
+```
+
+With shape, you can directly call the functions for each of the pre-programmed shapes and pass it into the `shape` kwarg:
+
+```python3
+rectangular_prism(l: float, 
+                  w: float, 
+                  h: float, 
+                  n: int, 
+                  point: tuple | Literal[-1]) -> tuple[list[Point], float]
+
+sphere(r: float, 
+       n: int, 
+       point: tuple | Literal[-1]) -> tuple[list[Point], float]
+
+tetrahedron(s: float, 
+            n: int, 
+            point: tuple | Literal[-1]) -> tuple[list[Point], float]
 ```
 
 Presently, as of 2023-22-05, other methods are not programmed yet.
