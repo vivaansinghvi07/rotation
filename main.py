@@ -118,7 +118,8 @@ def rotating_gif(frames: int, fps: int, shape: list[Point], name: str,
                  pitch: float | int, roll: float | int, yaw: float | int) -> None:
 
     ax = plt.axes(projection="3d")
-    os.mkdir("imgs")
+    try: os.mkdir("imgs")
+    except: pass
 
     i = 1
     points, lim = shape 
@@ -174,7 +175,7 @@ def rotating_gif(frames: int, fps: int, shape: list[Point], name: str,
 def main():
 
     # get the input
-    duration = float(input("Enter the duration of the rotation in seconds (or -1 for auto): "))
+    duration = float(input(blue_after("Enter the duration of the rotation in seconds (or -1 for auto): ")))
     fps = int(input(blue_after("Enter the frames per second: ")))
     assert 0 < fps <= 60, Color.RESET_COLOR + "FPS must be at least 1 or at most 60."
     pitch, roll, yaw = [float(input(blue_after(f"Enter the target {var} in degrees: ")))
@@ -207,7 +208,7 @@ def main():
         exit()
     
     # calculate number of frames given fps and speed
-    if duration == "-1":
+    if duration == -1:
         frames = max([pitch, roll, yaw]) / 5
     else:
         frames = duration * fps
@@ -231,16 +232,4 @@ def main():
         print("Other methods not supported yet!")
 
 if __name__ == "__main__":
-    rotating_gif(
-        frames=100,
-        fps=30,
-        shape=tetrahedron(
-            s=5,
-            n=100,
-            point="-1"
-        ),
-        pitch=360,
-        roll=0,
-        yaw=0,
-        name="crayz.gif"
-    )
+    main()
