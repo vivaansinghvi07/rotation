@@ -8,17 +8,18 @@ import sys
 import pynterface
 import math
 from pynterface import Color
+from typing import Literal
 
 class Point:
-    def __init__(self, x, y, z):
+    def __init__(self, x, y, z) -> None:
         self.x = x
         self.y = y
         self.z = z
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"({self.x}, {self.y}, {self.z})"
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
     
     def rotated(self, yaw, pitch, roll) -> Point:
@@ -31,16 +32,16 @@ class Point:
         newz = (x*-sb   + y*cb*sc            + z*cb*cc) 
         return Point(newx, newy, newz)
     
-    def dist(self, x, y, z):
+    def dist(self, x, y, z) -> float:
         return math.sqrt((x-self.x)**2 
                        + (y-self.y)**2 
                        + (z-self.z)**2)
     
-def blue_after(prompt):
+def blue_after(prompt: str) -> str:
     """ Makes the string end in a blue colored prompt, and begin with a color reset. """
     return Color.RESET_COLOR + prompt + Color.BLUE
 
-def rectangular_prism_points(l, w, h, n, point):
+def rectangular_prism_points(l: float, w: float, h: float, n: int, point: tuple | Literal[-1]) -> list[Point]:
 
     # determine if needs to automatically calc center
     if point == "-1":
@@ -58,7 +59,7 @@ def rectangular_prism_points(l, w, h, n, point):
 
     return points, lim
     
-def sphere_points(r, n, point):
+def sphere_points(r: float, n: int, point: tuple | Literal[-1]) -> list[Point]:
 
     # determine if needs to automatically calc center
     if point == "-1":
@@ -77,7 +78,7 @@ def sphere_points(r, n, point):
 
     return points, lim
 
-def tetrahedron_points(s, n, point):
+def tetrahedron_points(s: float, n: int, point: tuple | Literal[-1]) -> list[Point]:
 
     # ratio for calculating height
     h = math.sqrt(3)/2
@@ -113,7 +114,8 @@ def tetrahedron_points(s, n, point):
     
     return points, lim
 
-def rotating_gif(frames, fps, points, pitch, roll, yaw):
+def rotating_gif(frames: int, fps: int, points: list[Point], name: str, 
+                 pitch: float | int, roll: float | int, yaw: float | int) -> None:
 
     ax = plt.axes(projection="3d")
     os.mkdir("imgs")
@@ -161,9 +163,6 @@ def rotating_gif(frames, fps, points, pitch, roll, yaw):
         except:
             break
 
-    try: name = sys.argv[1]
-    except: name = "plot.gif"
-
     # saves the gif
     imageio.mimsave(name, images, fps=fps)
 
@@ -209,10 +208,13 @@ def main():
     else:
         frames = duration * fps
 
+    try: name = sys.argv[1]
+    except: name = "plot.gif"
+
     print(end=Color.RESET_COLOR)
     method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type of output:")
     if method == "gif":
-        rotating_gif(int(frames), fps, points, pitch, roll, yaw)
+        rotating_gif(int(frames), fps, points, name, pitch, roll, yaw)
     elif method == "other":
         print("Other methods not supported yet!")
 
