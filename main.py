@@ -51,8 +51,8 @@ def rectangular_prism_points(l, w, h, n, point):
     points_per_unit = (n / (l*w*h)) ** (1/3)
 
     points = [Point(x, y, z) for x in np.linspace(x0, x0+l, round(l*points_per_unit))
-                                for y in np.linspace(y0, y0+w, round(w*points_per_unit))
-                                for z in np.linspace(z0, z0+h, round(h*points_per_unit))]
+                             for y in np.linspace(y0, y0+w, round(w*points_per_unit))
+                             for z in np.linspace(z0, z0+h, round(h*points_per_unit))]
     
     lim = max(map(lambda i: abs(i)/2, [l, w, h])) + max(map(abs, [x0, y0, z0]))
 
