@@ -187,7 +187,7 @@ def rotating_gif(frames, fps, points, lim, pitch, roll, yaw):
 def main():
 
     # get the input
-    frames = int(input(blue_after("Enter the number of frames (-1 for auto): ")))
+    duration = float(input("Enter the duration of the rotation in seconds (or -1 for auto): "))
     fps = int(input(blue_after("Enter the frames per second: ")))
     assert 0 < fps <= 60, Color.RESET_COLOR + "FPS must be at least 1 or at most 60."
     pitch, roll, yaw = [float(input(blue_after(f"Enter the target {var} in degrees: ")))
@@ -196,9 +196,11 @@ def main():
     # get the points
     points, lim = gen_shape()
     
-    # automatically determine number of frames (currently 60 per full rotation)
-    if frames == -1:
-        frames = int(max([pitch, roll, yaw]) // 6)
+    # calculate number of frames given fps and speed
+    if duration == "-1":
+        frames = max([pitch, roll, yaw]) / 5
+    else:
+        frames = duration * fps
 
     print(end=Color.RESET_COLOR)
     method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type of output:")
@@ -208,5 +210,4 @@ def main():
         print("Other methods not supported yet!")
 
 if __name__ == "__main__":
-
     main()
