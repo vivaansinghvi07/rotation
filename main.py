@@ -41,7 +41,7 @@ def blue_after(prompt: str) -> str:
     """ Makes the string end in a blue colored prompt, and begin with a color reset. """
     return Color.RESET_COLOR + prompt + Color.BLUE
 
-def rectangular_prism_points(l: float, w: float, h: float, n: int, point: tuple | Literal[-1]) -> list[Point]:
+def rectangular_prism(l: float, w: float, h: float, n: int, point: tuple | Literal[-1]) -> tuple[list[Point], float]:
 
     # determine if needs to automatically calc center
     if point == "-1":
@@ -57,9 +57,9 @@ def rectangular_prism_points(l: float, w: float, h: float, n: int, point: tuple 
     
     lim = max(map(lambda i: abs(i)/2, [l, w, h])) + max(map(abs, [x0, y0, z0]))
 
-    return points, lim
+    return (points, lim)
     
-def sphere_points(r: float, n: int, point: tuple | Literal[-1]) -> list[Point]:
+def sphere(r: float, n: int, point: tuple | Literal[-1]) -> tuple[list[Point], float]:
 
     # determine if needs to automatically calc center
     if point == "-1":
@@ -78,7 +78,7 @@ def sphere_points(r: float, n: int, point: tuple | Literal[-1]) -> list[Point]:
 
     return points, lim
 
-def tetrahedron_points(s: float, n: int, point: tuple | Literal[-1]) -> list[Point]:
+def tetrahedron(s: float, n: int, point: tuple | Literal[-1]) -> tuple[list[Point], float]:
 
     # ratio for calculating height
     h = math.sqrt(3)/2
@@ -114,14 +114,14 @@ def tetrahedron_points(s: float, n: int, point: tuple | Literal[-1]) -> list[Poi
     
     return points, lim
 
-def rotating_gif(frames: int, fps: int, points: list[Point], name: str, 
+def rotating_gif(frames: int, fps: int, shape: list[Point], name: str, 
                  pitch: float | int, roll: float | int, yaw: float | int) -> None:
 
     ax = plt.axes(projection="3d")
     os.mkdir("imgs")
 
     i = 1
-    points, lim = points 
+    points, lim = shape 
     pitch, roll, yaw = map(rad, [pitch, roll, yaw])
 
     
@@ -181,26 +181,30 @@ def main():
                         for var in ["pitch", "roll", "yaw"]]
     
     rect = "Rectangular Prism"
-    sphere = "Sphere"
+    sph = "Sphere"
     tetra = "Tetrahedron"
 
-    shape = pynterface.numbered_menu([rect, sphere, tetra], beginning_prompt=Color.RESET_COLOR + "Select the type of shape to be modeled: ")
+    shape = pynterface.numbered_menu([rect, sph, tetra], beginning_prompt=Color.RESET_COLOR + "Select the type of shape to be modeled: ")
     
-    if shape == sphere:
+    # obtain the points for the thing
+    if shape == sph:
         r = float(input(blue_after("Enter the radius of the sphere: ")))
         n = int(input(blue_after("Enter an approximate number of points: ")))  
         point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
-        points = sphere_points(r, n, point)
+        shape = sphere(r, n, point)
     elif shape == rect:
         l, w, h = map(float, input(blue_after("Enter the dimensions seperated by commas in the form \"l, w, h\": ")).split(','))   
         n = int(input(blue_after("Enter an approximate number of points: ")))
         point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
-        points = rectangular_prism_points(l, w, h, n, point)
+        shape = rectangular_prism(l, w, h, n, point)
     elif shape == tetra:
         s = float(input(blue_after("Enter a side length: ")))
         n = int(input(blue_after("Enter an approximate number of points: ")))
         point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
-        points = tetrahedron_points(s, n, point)
+        shape = tetrahedron(s, n, point)
+    else:
+        print("Invalid shape!")
+        exit()
     
     # calculate number of frames given fps and speed
     if duration == "-1":
@@ -217,7 +221,7 @@ def main():
         rotating_gif(
             frames=int(frames),
             fps=fps,
-            points=points,
+            shape=shape,
             name=name,
             pitch=pitch,
             roll=roll,
@@ -230,12 +234,13 @@ if __name__ == "__main__":
     rotating_gif(
         frames=100,
         fps=30,
-        points=tetrahedron_points(
+        shape=tetrahedron(
             s=5,
             n=100,
             point="-1"
         ),
         pitch=360,
         roll=0,
-        yaw=0
+        yaw=0,
+        name="crayz.gif"
     )
