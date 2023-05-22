@@ -128,7 +128,7 @@ def tetrahedron(s: float, n: int, point: tuple | Literal[-1]) -> tuple[list[Poin
     
     return points, lim
 
-def rotating_gif(frames: int, fps: int, shape: list[Point], name: str, 
+def rotating_gif(frames: int, fps: int, shape: tuple[list[Point], float], name: str, 
                  pitch: float | int, roll: float | int, yaw: float | int) -> None:
 
     ax = plt.axes(projection="3d")
