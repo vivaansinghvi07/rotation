@@ -33,107 +33,95 @@ class Point:
     
     def dist(self, x, y, z):
         return math.sqrt((x-self.x)**2 
-                     + (y-self.y)**2 
-                     + (z-self.z)**2)
+                       + (y-self.y)**2 
+                       + (z-self.z)**2)
     
 def blue_after(prompt):
     """ Makes the string end in a blue colored prompt, and begin with a color reset. """
     return Color.RESET_COLOR + prompt + Color.BLUE
 
-def gen_shape():
+def rectangular_prism_points(l, w, h, n, point):
+
+    # determine if needs to automatically calc center
+    if point == "-1":
+        x0, y0, z0 = -l/2, -w/2, -h/2
+    else:
+        x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
+
+    points_per_unit = (n / (l*w*h)) ** (1/3)
+
+    points = [Point(x, y, z) for x in np.linspace(x0, x0+l, round(l*points_per_unit))
+                                for y in np.linspace(y0, y0+w, round(w*points_per_unit))
+                                for z in np.linspace(z0, z0+h, round(h*points_per_unit))]
     
-    rect = "Rectangular Prism"
-    sphere = "Sphere"
-    tetra = "Tetrahedron"
+    lim = max(map(lambda i: abs(i)/2, [l, w, h])) + max(map(abs, [x0, y0, z0]))
 
-    shape = pynterface.numbered_menu([rect, sphere, tetra], beginning_prompt=Color.RESET_COLOR + "Select the type of shape to be modeled: ")
-
-    if shape == rect:
-        l, w, h = map(float, input(blue_after("Enter the dimensions seperated by commas in the form \"l, w, h\": ")).split(','))   
-        n = int(input(blue_after("Enter an approximate number of points: ")))
-        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
-
-        # determine if needs to automatically calc center
-        if point == "-1":
-            x0, y0, z0 = -l/2, -w/2, -h/2
-        else:
-            x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
-
-        points_per_unit = (n / (l*w*h)) ** (1/3)
-
-        points = [Point(x, y, z) for x in np.linspace(x0, x0+l, round(l*points_per_unit))
-                                 for y in np.linspace(y0, y0+w, round(w*points_per_unit))
-                                 for z in np.linspace(z0, z0+h, round(h*points_per_unit))]
-        
-        lim = max(map(lambda i: abs(i)/2, [l, w, h])) + max(map(abs, [x0, y0, z0]))
+    return points, lim
     
-    elif shape == sphere:
+def sphere_points(r, n, point):
 
-        r = float(input(blue_after("Enter the radius of the sphere: ")))
-        n = int(input(blue_after("Enter an approximate number of points: ")))  
-        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
+    # determine if needs to automatically calc center
+    if point == "-1":
+        x0, y0, z0 = 0, 0, 0
+    else:
+        x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
 
-        # determine if needs to automatically calc center
-        if point == "-1":
-            x0, y0, z0 = 0, 0, 0
-        else:
-            x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
-
-        points_per_unit = (n/(4/3*np.pi*r**3))**(1/3)*2 # fit to cube
-        
-        points = [point for x in np.linspace(x0-r, x0+r, round(r*points_per_unit))
-                        for y in np.linspace(y0-r, y0+r, round(r*points_per_unit))
-                        for z in np.linspace(z0-r, z0+r, round(r*points_per_unit))
-                        if (point:=Point(x, y, z)).dist(x0, y0, z0) <= r]
-
-        lim = max(map(abs, [x0, y0, z0])) * 2 * r
+    points_per_unit = (n/(4/3*np.pi*r**3))**(1/3)*2 # fit to cube
     
-    elif shape == tetra:
+    points = [point for x in np.linspace(x0-r, x0+r, round(r*points_per_unit))
+                    for y in np.linspace(y0-r, y0+r, round(r*points_per_unit))
+                    for z in np.linspace(z0-r, z0+r, round(r*points_per_unit))
+                    if (point:=Point(x, y, z)).dist(x0, y0, z0) <= r]
 
-        s = float(input(blue_after("Enter a side length: ")))
-        n = int(input(blue_after("Enter an approximate number of points: ")))
+    lim = max(map(abs, [x0, y0, z0])) + 2 * r
 
-        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
-
-        # ratio for calculating height
-        h = math.sqrt(3)/2
-
-        # determine if needs to automatically calc center
-        if point == "-1":
-            x0, y0, z0 = 0, 0, (s*h*2/3)
-        else:
-            x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
-
-        points_per_side = round((n*(math.sqrt(72)))**(1/3))
-
-        def gen_triangle(x0, y0, z0, it, pps, slen):
-
-            # determine the coordinates of the other points
-            points = []
-            pz = z0 - it / pps * slen * h   # height level
-            for i in range(it): # "it" determines how many levels there are in the triangle
-                py = y0 + - (i - ((it-1) * 2/3)) * slen / pps * h # for each row
-                for j in range(i+1):
-                    px = x0 + (j - i / 2) * (slen / pps)
-                    points.append(Point(px, py, pz))
-            
-            return points
-        
-        points = []
-        for i in range(points_per_side):
-            # generate a base traingle centered around x0, y0, z0
-            temp_points = gen_triangle(x0, y0, z0, i, points_per_side, s)   
-            points.extend(temp_points)      # extend the temp points array
-
-        lim = max(map(abs, [x0, y0, z0-(s*h*2/3)])) + s * 0.5
-        
     return points, lim
 
-def rotating_gif(frames, fps, points, lim, pitch, roll, yaw):
+def tetrahedron_points(s, n, point):
+
+    # ratio for calculating height
+    h = math.sqrt(3)/2
+
+    # determine if needs to automatically calc center
+    if point == "-1":
+        x0, y0, z0 = 0, 0, (s*h*2/3)
+    else:
+        x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
+
+    points_per_side = round((n*(math.sqrt(72)))**(1/3))
+
+    def gen_triangle(x0, y0, z0, it, pps, slen):
+
+        # determine the coordinates of the other points
+        points = []
+        pz = z0 - it / pps * slen * h   # height level
+        for i in range(it): # "it" determines how many levels there are in the triangle
+            py = y0 + - (i - ((it-1) * 2/3)) * slen / pps * h # for each row
+            for j in range(i+1):
+                px = x0 + (j - i / 2) * (slen / pps)
+                points.append(Point(px, py, pz))
+        
+        return points
+    
+    points = []
+    for i in range(points_per_side):
+        # generate a base traingle centered around x0, y0, z0
+        temp_points = gen_triangle(x0, y0, z0, i, points_per_side, s)   
+        points.extend(temp_points)      # extend the temp points array
+
+    lim = max(map(abs, [x0, y0, z0-(s*h*2/3)])) + s * 0.5
+    
+    return points, lim
+
+def rotating_gif(frames, fps, points, pitch, roll, yaw):
 
     ax = plt.axes(projection="3d")
     os.mkdir("imgs")
+
     i = 1
+    points, lim = points 
+    pitch, roll, yaw = map(rad, [pitch, roll, yaw])
+
     
     for p, r, y in zip(np.linspace(0, pitch, frames), 
                        np.linspace(0, roll, frames), 
@@ -193,8 +181,27 @@ def main():
     pitch, roll, yaw = [float(input(blue_after(f"Enter the target {var} in degrees: ")))
                         for var in ["pitch", "roll", "yaw"]]
     
-    # get the points
-    points, lim = gen_shape()
+    rect = "Rectangular Prism"
+    sphere = "Sphere"
+    tetra = "Tetrahedron"
+
+    shape = pynterface.numbered_menu([rect, sphere, tetra], beginning_prompt=Color.RESET_COLOR + "Select the type of shape to be modeled: ")
+    
+    if shape == sphere:
+        r = float(input(blue_after("Enter the radius of the sphere: ")))
+        n = int(input(blue_after("Enter an approximate number of points: ")))  
+        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
+        points = sphere_points(r, n, point)
+    elif shape == rect:
+        l, w, h = map(float, input(blue_after("Enter the dimensions seperated by commas in the form \"l, w, h\": ")).split(','))   
+        n = int(input(blue_after("Enter an approximate number of points: ")))
+        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
+        points = rectangular_prism_points(l, w, h, n, point)
+    elif shape == tetra:
+        s = float(input(blue_after("Enter a side length: ")))
+        n = int(input(blue_after("Enter an approximate number of points: ")))
+        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
+        points = tetrahedron_points(s, n, point)
     
     # calculate number of frames given fps and speed
     if duration == "-1":
@@ -205,9 +212,20 @@ def main():
     print(end=Color.RESET_COLOR)
     method = pynterface.numbered_menu(["gif", "other"], beginning_prompt="Enter the type of output:")
     if method == "gif":
-        rotating_gif(frames, fps, points, lim, *map(rad, [pitch, roll, yaw]))
+        rotating_gif(int(frames), fps, points, pitch, roll, yaw)
     elif method == "other":
         print("Other methods not supported yet!")
 
 if __name__ == "__main__":
-    main()
+    rotating_gif(
+        frames=100,
+        fps=30,
+        points=tetrahedron_points(
+            s=5,
+            n=100,
+            point="-1"
+        ),
+        pitch=360,
+        roll=0,
+        yaw=0
+    )
