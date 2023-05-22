@@ -43,11 +43,16 @@ def blue_after(prompt: str) -> str:
 
 def rectangular_prism(l: float, w: float, h: float, n: int, point: tuple | Literal[-1]) -> tuple[list[Point], float]:
 
+    """
+    The point [0, 0, 0] is assumed to be the lowest point in value of the rectangular prism.
+    Meaning that, assuming [l, w, h] are all non-negative, it will have the lowest [x, y, z] values.
+    """
+
     # determine if needs to automatically calc center
-    if point == "-1":
+    if point == -1:
         x0, y0, z0 = -l/2, -w/2, -h/2
     else:
-        x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
+        x0, y0, z0 = map(lambda x: -x, point)
 
     points_per_unit = (n / (l*w*h)) ** (1/3)
 
@@ -60,12 +65,17 @@ def rectangular_prism(l: float, w: float, h: float, n: int, point: tuple | Liter
     return (points, lim)
     
 def sphere(r: float, n: int, point: tuple | Literal[-1]) -> tuple[list[Point], float]:
+    
+    """
+    The point [0, 0, 0] is assumed to be the center.
+    The program assigning different values to the center is merely to simulate rotation around a point.
+    """
 
     # determine if needs to automatically calc center
-    if point == "-1":
+    if point == -1:
         x0, y0, z0 = 0, 0, 0
     else:
-        x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
+        x0, y0, z0 = map(lambda x: -x, point)
 
     points_per_unit = (n/(4/3*np.pi*r**3))**(1/3)*2 # fit to cube
     
@@ -80,14 +90,18 @@ def sphere(r: float, n: int, point: tuple | Literal[-1]) -> tuple[list[Point], f
 
 def tetrahedron(s: float, n: int, point: tuple | Literal[-1]) -> tuple[list[Point], float]:
 
+    """
+    [0, 0, 0] is assumed to be the tip of the triangle.
+    """
+
     # ratio for calculating height
     h = math.sqrt(3)/2
 
     # determine if needs to automatically calc center
-    if point == "-1":
+    if point == -1:
         x0, y0, z0 = 0, 0, (s*h*2/3)
     else:
-        x0, y0, z0 = map(lambda x: -x, map(float, point.split(',')))
+        x0, y0, z0 = map(lambda x: -x, point)
 
     points_per_side = round((n*(math.sqrt(72)))**(1/3))
 
@@ -187,21 +201,20 @@ def main():
 
     shape = pynterface.numbered_menu([rect, sph, tetra], beginning_prompt=Color.RESET_COLOR + "Select the type of shape to be modeled: ")
     
+    n = int(input(blue_after("Enter an approximate number of points: ")))  
+    point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
+    if point == -1: pass
+    else: point = tuple(map(float, point.split(',')))
+
     # obtain the points for the thing
     if shape == sph:
         r = float(input(blue_after("Enter the radius of the sphere: ")))
-        n = int(input(blue_after("Enter an approximate number of points: ")))  
-        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
         shape = sphere(r, n, point)
     elif shape == rect:
         l, w, h = map(float, input(blue_after("Enter the dimensions seperated by commas in the form \"l, w, h\": ")).split(','))   
-        n = int(input(blue_after("Enter an approximate number of points: ")))
-        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
         shape = rectangular_prism(l, w, h, n, point)
     elif shape == tetra:
         s = float(input(blue_after("Enter a side length: ")))
-        n = int(input(blue_after("Enter an approximate number of points: ")))
-        point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
         shape = tetrahedron(s, n, point)
     else:
         print("Invalid shape!")
@@ -230,6 +243,25 @@ def main():
         )
     elif method == "other":
         print("Other methods not supported yet!")
+
+def demo():
+    try: os.mkdir('demo')
+    except: pass
+    os.chdir('demo')
+
+    rotating_gif(
+        frames=600,
+        fps=60,
+        shape=rectangular_prism(
+            l=4, w=5, h=9,
+            n=200,
+            point=(4, 5, 2)
+        ),
+        name="rect.gif",
+        pitch=702,
+        roll=-349.2,
+        yaw=204
+    )
 
 if __name__ == "__main__":
     main()
