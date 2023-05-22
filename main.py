@@ -167,6 +167,8 @@ def rotating_gif(frames: int, fps: int, shape: list[Point], name: str,
         # increment plot name counter
         i += 1
 
+    plt.close()
+
     # creates images array and depth counter
     images, i = [], 1
 
@@ -245,6 +247,9 @@ def main():
         print("Other methods not supported yet!")
 
 def demo():
+
+    """ Used to create the examples. """
+
     try: os.mkdir('demo')
     except: pass
     os.chdir('demo')
@@ -261,6 +266,34 @@ def demo():
         pitch=702,
         roll=-349.2,
         yaw=204
+    )
+
+    rotating_gif(
+        frames=300,
+        fps=60,
+        shape=sphere(
+            r=5,
+            n=200,
+            point=(1, 1, 1)
+        ),
+        name="sphere.gif",
+        pitch=360,
+        roll=360,
+        yaw=-360
+    )
+
+    rotating_gif(
+        frames=360,
+        fps=60,
+        shape=tetrahedron(
+            s=4,
+            n=50,
+            point=-1
+        ),
+        name="tetrahedron.gif",
+        pitch=0,
+        roll=360,
+        yaw=0
     )
 
 if __name__ == "__main__":
