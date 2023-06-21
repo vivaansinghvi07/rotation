@@ -205,7 +205,7 @@ def main():
     
     n = int(input(blue_after("Enter an approximate number of points: ")))  
     point = input(blue_after("Enter the point to revolve around in the format \"x, y, z\", or -1 to revolve around the center: "))
-    if point == -1: pass
+    if point == '-1': pass
     else: point = tuple(map(float, point.split(',')))
 
     # obtain the points for the thing
